@@ -1,0 +1,16 @@
+{
+  "name": "govn",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Selby Kendrick",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.14.2",
+    "feathers": "^1.3.0",
+    "feathers-memory": "^0.5.1"
+  }
+}

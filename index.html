@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Feathers real-time Todos</title>
+  <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+  <style type="text/css">
+    .done {
+      text-decoration: line-through;
+    }
+  </style>
+
+  <div class="container" id="todos">
+    <h1>Feathers real-time Todos</h1>
+
+    <ul class="todos list-unstyled"></ul>
+    <form role="form" class="create-todo">
+      <div class="form-group">
+        <input type="text" class="form-control" name="description" placeholder="Add a new Todo">
+      </div>
+      <button type="submit" class="btn btn-info col-md-12">Add Todo</button>
+    </form>
+  </div>
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script src="http://rawgit.com/feathersjs/feathers-client/release/dist/feathers.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var el = $('#todos');
+    var socket = io();
+    var app = feathers()
+      .configure(feathers.socketio(socket));
+    var todos = app.service('todos');
+
+
+    function getElement(todo) {
+      return el.find('[data-id="' + todo.id + '"]')
+    }
+
+    function addTodo(todo) {
+      var html = '<li class="page-header checkbox" data-id="' + todo.id + '">' +
+        '<label><input type="checkbox" name="done">' +
+        todo.text +
+        '</label><a href="javascript://" class="pull-right delete">' +
+        '<span class="glyphicon glyphicon-remove"></span>' +
+        '</a></li>';
+
+      el.find('.todos').append(html);
+      updateTodo(todo);
+    }
+
+    function removeTodo(todo) {
+      getElement(todo).remove();
+    }
+
+    function updateTodo(todo) {
+      var element = getElement(todo);
+      var checkbox = element.find('[name="done"]').removeAttr('disabled');
+
+      element.toggleClass('done', todo.complete);
+      checkbox.prop('checked', todo.complete);
+    }
+
+    el.on('submit', 'form', function(ev) {
+      var field = $(this).find('[name="description"]');
+
+      todos.create({
+        text: field.val(),
+        complete: false
+      });
+
+      field.val('');
+      ev.preventDefault();
+    });
+
+    el.on('click', '.delete', function(ev) {
+      var id = $(this).parents('li').data('id');
+      todos.remove(id);
+      ev.preventDefault();
+    });
+
+    el.on('click', '[name="done"]', function(ev) {
+      var id = $(this).parents('li').data('id');
+
+      $(this).attr('disabled', 'disabled');
+
+      todos.update(id, {
+        complete: $(this).is(':checked')
+      });
+    });
+
+    todos.on('updated', updateTodo);
+    todos.on('removed', removeTodo);
+    todos.on('created', addTodo);
+
+    todos.find(function(error, todos) {
+      todos.forEach(addTodo);
+    });
+  </script>
+</body>
+
+</html>
