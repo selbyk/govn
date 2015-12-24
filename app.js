@@ -19,4 +19,4 @@ var app = feathers()
   // Host our Todos service on the /todos path
   .use('/todos', todoService);
 
-app.listen(5000);
+app.listen(5050);
